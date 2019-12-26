@@ -51,9 +51,24 @@ app.use((req, res, next) => {
 
 //Writing graphql query for API
 //This can be any http method
+//Adding graphiql to show API doc and play around with API
 app.use('/graphql', graphqlHttp({
   schema: schema,
-  rootValue: resolver
+  rootValue: resolver,
+  graphiql: true,
+  customFormatErrorFn(err){
+    //This function is for creating custom error in graphql
+      //Original error object contians the data we set when we throw the error and can be displayed here.
+    if(!err.originalError) {
+      console.log("this");
+      return err;
+    }
+    console.log(err);
+    const data = err.originalError.data;
+    const message = err.message || 'An error occured';
+    const code = err.originalError.code || 500;
+    return{message: message, status: code, data: data}
+  }
 }))
 
 app.use((error, req, res, next) => {
